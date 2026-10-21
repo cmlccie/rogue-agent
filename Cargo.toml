@@ -1,16 +1,16 @@
 [package]
-name = "agent-analyzer"
+name = "rogue-agent"
 version = "0.1.0"
 edition = "2024"
-description = "Kubernetes-native AI component discovery and reachability analyzer"
+description = "Kubernetes-native rogue agent that discovers and persistently probes AI services to demonstrate network policy enforcement"
 license = "MIT"
 
 [[bin]]
-name = "agent-analyzer"
+name = "rogue-agent"
 path = "src/main.rs"
 
 [lib]
-name = "agent_analyzer"
+name = "rogue_agent"
 path = "src/lib.rs"
 
 [dependencies]

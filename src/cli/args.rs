@@ -1,9 +1,9 @@
 use crate::core::mock::FailKey;
 use clap::{Parser, Subcommand};
 
-/// Kubernetes-native AI component discovery and reachability analyzer.
+/// Kubernetes-native rogue agent that discovers and persistently probes AI services to demonstrate network policy enforcement.
 #[derive(Debug, Parser)]
-#[command(name = "agent-analyzer", version, about, long_about = None)]
+#[command(name = "rogue-agent", version, about, long_about = None)]
 pub struct Args {
     /// Increase log verbosity (-v info, -vv debug, -vvv trace).
     #[arg(short, long, action = clap::ArgAction::Count, global = true)]
@@ -26,7 +26,7 @@ pub enum Command {
 #[derive(Debug, Parser)]
 pub struct ServeArgs {
     /// Path to the configuration file.
-    #[arg(long, default_value = "/etc/agent-analyzer/config.yaml")]
+    #[arg(long, default_value = "/etc/rogue-agent/config.yaml")]
     pub config: std::path::PathBuf,
 
     /// Address to listen on.

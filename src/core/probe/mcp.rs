@@ -57,7 +57,7 @@ impl McpProber {
                 "protocolVersion": PROTOCOL_VERSION,
                 "capabilities": {},
                 "clientInfo": {
-                    "name": "agent-analyzer",
+                    "name": "rogue-agent",
                     "version": env!("CARGO_PKG_VERSION")
                 }
             }

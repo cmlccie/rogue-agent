@@ -27,10 +27,10 @@ fn free_port() -> u16 {
 
 fn start_mock_server(port: u16, extra_args: &[&str]) -> ServerGuard {
     let bind = format!("127.0.0.1:{port}");
-    let mut cmd = StdCommand::new(cargo_bin("agent-analyzer"));
+    let mut cmd = StdCommand::new(cargo_bin("rogue-agent"));
     cmd.args(["serve", "--bind", &bind, "mock"]);
     cmd.args(extra_args);
-    ServerGuard(cmd.spawn().expect("failed to spawn agent-analyzer"))
+    ServerGuard(cmd.spawn().expect("failed to spawn rogue-agent"))
 }
 
 fn wait_for_server(port: u16) {
@@ -50,7 +50,7 @@ fn status_text_shows_targets() {
     let _guard = start_mock_server(port, &[]);
     wait_for_server(port);
 
-    Command::cargo_bin("agent-analyzer")
+    Command::cargo_bin("rogue-agent")
         .unwrap()
         .args(["status", "--url", &url])
         .assert()
@@ -66,7 +66,7 @@ fn status_json_is_valid() {
     let _guard = start_mock_server(port, &[]);
     wait_for_server(port);
 
-    let output = Command::cargo_bin("agent-analyzer")
+    let output = Command::cargo_bin("rogue-agent")
         .unwrap()
         .args(["status", "--url", &url, "--format", "json"])
         .output()
@@ -85,7 +85,7 @@ fn status_shows_failed_when_flagged() {
     let _guard = start_mock_server(port, &["--fail", "model:gpt-4"]);
     wait_for_server(port);
 
-    Command::cargo_bin("agent-analyzer")
+    Command::cargo_bin("rogue-agent")
         .unwrap()
         .args(["status", "--url", &url])
         .assert()

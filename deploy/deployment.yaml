@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: agent-analyzer
+  name: rogue-agent
   namespace: default
   labels:
-    app: agent-analyzer
+    app: rogue-agent
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: agent-analyzer
+      app: rogue-agent
   template:
     metadata:
       labels:
-        app: agent-analyzer
+        app: rogue-agent
     spec:
-      serviceAccountName: agent-analyzer
+      serviceAccountName: rogue-agent
       containers:
-        - name: agent-analyzer
-          image: ghcr.io/cmlccie/agent-analyzer:main
-          args: ["serve", "--config", "/etc/agent-analyzer/config.yaml"]
+        - name: rogue-agent
+          image: ghcr.io/cmlccie/rogue-agent:main
+          args: ["serve", "--config", "/etc/rogue-agent/config.yaml"]
           ports:
             - name: http
               containerPort: 8000
               protocol: TCP
           volumeMounts:
             - name: config
-              mountPath: /etc/agent-analyzer
+              mountPath: /etc/rogue-agent
               readOnly: true
           livenessProbe:
             httpGet:
@@ -44,16 +44,16 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: agent-analyzer
+            name: rogue-agent
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: agent-analyzer
+  name: rogue-agent
   namespace: default
 spec:
   selector:
-    app: agent-analyzer
+    app: rogue-agent
   ports:
     - port: 8000
       targetPort: 8000

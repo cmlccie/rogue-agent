@@ -1,4 +1,4 @@
-# Plan: `agent-analyzer` Rust TUI
+# Plan: `rogue-agent` Rust TUI
 
 ## Context
 
@@ -7,7 +7,7 @@ Build a Kubernetes-native Rust binary that discovers and probes AI components (L
 1. **Discovery / troubleshooting** — see at a glance what models/agents/tools your environment can talk to.
 2. **Cilium NetworkPolicy demo** — apply a policy and watch previously-green checkmarks flip to red X's in real time.
 
-The repo is currently an empty `cargo new` skeleton (`Cargo.toml` has `name = "agent-analyzer"`, edition `2024`, no dependencies; no `src/` files). This plan establishes the full crate structure, dependencies, and module layout, mirroring the patterns used in [`cmlccie/awsipranges`](https://github.com/cmlccie/awsipranges) (lib + bin, `core/` and `cli/` modules, embedded unit tests, `tests/` integration suite).
+The repo is currently an empty `cargo new` skeleton (`Cargo.toml` has `name = "rogue-agent"`, edition `2024`, no dependencies; no `src/` files). This plan establishes the full crate structure, dependencies, and module layout, mirroring the patterns used in [`cmlccie/awsipranges`](https://github.com/cmlccie/awsipranges) (lib + bin, `core/` and `cli/` modules, embedded unit tests, `tests/` integration suite).
 
 ---
 
@@ -17,7 +17,7 @@ The repo is currently an empty `cargo new` skeleton (`Cargo.toml` has `name = "a
 - **MCP / A2A**: try `mcp-client-rs` and `fasa2a` upstream first; abstract behind an internal trait so we can swap to a thin in-house layer if either crate proves problematic.
 - **Hot reload**: `notify` crate watching `config.yaml`. Handle the K8s ConfigMap symlink-swap pattern.
 - **Health probes**: protocol-native (`/v1/models` via async-openai; MCP `initialize` + `tools/list`; A2A agent-card fetch; HTTP GET for websites). Required for the Cilium demo to be meaningful.
-- **K8s discovery**: convention-only, with **user-supplied K8s-native label selectors** per component type — no `agent-analyzer.io/*` labels are required on target services. Operators write whatever selector matches their existing labels (`app=vllm`, `model=gpt-oss-20b`, `app in (mcp-fs, mcp-github)`, etc.). For each matched Service we apply per-kind conventions: scheme=http, first/named port, default path (`/v1/models` for model, `/mcp` for MCP tool, `/.well-known/agent.json` for A2A agent). No annotations, no CRDs.
+- **K8s discovery**: convention-only, with **user-supplied K8s-native label selectors** per component type — no `rogue-agent.io/*` labels are required on target services. Operators write whatever selector matches their existing labels (`app=vllm`, `model=gpt-oss-20b`, `app in (mcp-fs, mcp-github)`, etc.). For each matched Service we apply per-kind conventions: scheme=http, first/named port, default path (`/v1/models` for model, `/mcp` for MCP tool, `/.well-known/agent.json` for A2A agent). No annotations, no CRDs.
 - **Manual vs discovered**: same `Target` struct with `source: Discovered | Manual` enum; merged into the same pane lists.
 - **Mock**: `serve mock` loads fixed in-code fixtures; `--fail <kind:name>` flag flips selected items to failed for demo dry-runs.
 
@@ -26,7 +26,7 @@ The repo is currently an empty `cargo new` skeleton (`Cargo.toml` has `name = "a
 ## Crate layout
 
 ```
-agent-analyzer/
+rogue-agent/
 ├── Cargo.toml
 ├── README.md
 ├── Containerfile
@@ -161,11 +161,11 @@ Error pattern (matching awsipranges): `pub type Error = Box<dyn std::error::Erro
 ## CLI surface
 
 ```
-agent-analyzer                       # default → tui --url http://localhost:8000
-agent-analyzer tui [--url URL]
-agent-analyzer status [--url URL] [--format text|json]
-agent-analyzer serve --config /etc/agent-analyzer/config.yaml [--bind 0.0.0.0:8000]
-agent-analyzer serve mock [--fail KIND:NAME]... [--bind 0.0.0.0:8000]
+rogue-agent                       # default → tui --url http://localhost:8000
+rogue-agent tui [--url URL]
+rogue-agent status [--url URL] [--format text|json]
+rogue-agent serve --config /etc/rogue-agent/config.yaml [--bind 0.0.0.0:8000]
+rogue-agent serve mock [--fail KIND:NAME]... [--bind 0.0.0.0:8000]
 ```
 
 ---
@@ -230,10 +230,10 @@ Loaded at startup; `notify` watcher re-parses on change and atomically swaps the
 
 ## Deployment artifacts
 
-- **Containerfile**: multi-stage. Stage 1 `rust:1-alpine` or `cargo-chef` for caching, build with `--target x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl` for static binary. Stage 2 `gcr.io/distroless/static-debian12:nonroot`. Binary at `/opt/agent-analyzer` (short path keeps demo typing fast), default config path `/etc/agent-analyzer/config.yaml`, `WORKDIR /opt`. `CMD ["/opt/agent-analyzer", "serve", "--config", "/etc/agent-analyzer/config.yaml"]`.
+- **Containerfile**: multi-stage. Stage 1 `rust:1-alpine` or `cargo-chef` for caching, build with `--target x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl` for static binary. Stage 2 `gcr.io/distroless/static-debian12:nonroot`. Binary at `/opt/rogue-agent` (short path keeps demo typing fast), default config path `/etc/rogue-agent/config.yaml`, `WORKDIR /opt`. `CMD ["/opt/rogue-agent", "serve", "--config", "/etc/rogue-agent/config.yaml"]`.
 - **GitHub Actions workflow**: `docker/setup-buildx-action` + `docker/build-push-action` with `platforms: linux/amd64,linux/arm64`, push to GHCR.
 - **deploy/rbac.yaml**: ServiceAccount + ClusterRole granting `get,list,watch` on `services` and `endpoints` (no secrets). RoleBinding scoped to namespaces or ClusterRoleBinding per ops choice.
-- **deploy/deployment.yaml**: 1 replica, mounts the ConfigMap at `/etc/agent-analyzer/`, container port 8000.
+- **deploy/deployment.yaml**: 1 replica, mounts the ConfigMap at `/etc/rogue-agent/`, container port 8000.
 - **deploy/netpol-demo.yaml**: CiliumNetworkPolicy that allows egress to a subset of model/agent/tool service labels — used to demo the green→red transitions.
 
 ---
@@ -249,8 +249,8 @@ End-to-end checks for the implementer to run:
 5. `cargo run -- serve mock` then in another terminal `cargo run -- status` → status command lists fixtures with the expected ✓/✗.
 6. `cargo run -- serve mock --fail model:gpt-4` then `cargo run` → TUI shows red X next to gpt-4, green elsewhere.
 7. `curl http://localhost:8000/api/v1/state | jq` against `serve mock` returns the full state JSON.
-8. Containerfile build: `docker buildx build --platform linux/amd64,linux/arm64 -t agent-analyzer:dev .` succeeds.
-9. In-cluster smoke test: deploy via `deploy/`, point selectors at a couple of existing Services (e.g. `app=vllm`), verify discovery picks them up (`kubectl exec -it deploy/agent-analyzer -- /opt/agent-analyzer status`), then apply `deploy/netpol-demo.yaml` and verify selected targets flip to ✗ within one probe interval.
+8. Containerfile build: `docker buildx build --platform linux/amd64,linux/arm64 -t rogue-agent:dev .` succeeds.
+9. In-cluster smoke test: deploy via `deploy/`, point selectors at a couple of existing Services (e.g. `app=vllm`), verify discovery picks them up (`kubectl exec -it deploy/rogue-agent -- /opt/rogue-agent status`), then apply `deploy/netpol-demo.yaml` and verify selected targets flip to ✗ within one probe interval.
 
 ---
 
