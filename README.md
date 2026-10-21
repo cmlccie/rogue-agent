@@ -1,10 +1,14 @@
-# Agent Analyzer
+# Rogue Agent
 
-A Kubernetes-native terminal UI for discovering and probing AI components — models, agents, tools, and websites — with continuous reachability monitoring.
+A Kubernetes-native "rogue" AI agent for demonstrating zero-trust network policies. It discovers locally hosted AI services (models, agents, and tools) and external AI services (ChatGPT, Claude, etc.), then persistently attempts to connect to and access every one of them.
+
+Deploy it into an agent environment, apply your Cilium Network Policies, and watch in real time which communication paths the policies allow and which they block.
 
 ## Overview
 
-`agent-analyzer` runs as a lightweight backend server that:
+`rogue-agent` behaves like an unconstrained agent that tries to reach everything it can find. Its terminal UI makes the effect of each L3/L4/L7 policy visible: an explicitly allowed path stays green, and everything else flips to red with the reason it failed.
+
+The backend server:
 
 - **Discovers** AI components from Kubernetes services (by label selector) and from a static config file
 - **Probes** each target on a configurable interval using the appropriate protocol, and inventories what it finds: served models (OpenAI-compatible `/models`), advertised skills (A2A agent card), available tools (MCP `initialize` + `tools/list` over Streamable HTTP), or plain HTTP reachability
@@ -14,18 +18,25 @@ A Kubernetes-native terminal UI for discovering and probing AI components — mo
 
 A TUI client polls the backend and displays live, color-coded status across four inventory panes (Models / Agents (A2A) / Tools (MCP) / External Hosts), with a detail pane showing the selected target, its last probe error or inventory, and its probe history. Press `r` to run discovery and a probe pass immediately.
 
+## Demo: constraining the rogue agent
+
+1. Deploy `rogue-agent` with no policy applied. Every discovered model, agent, tool, and external host shows ✓ because nothing restricts its egress.
+2. Apply a zero-trust CiliumNetworkPolicy that allows only the paths the agent needs (for example, `deploy/netpol-demo.yaml`).
+3. Watch the TUI. Within one probe interval, every path the policy does not allow flips to ✗, and the detail pane shows how it failed: a timeout for an L3/L4 drop, or an HTTP 403 for an L7 denial.
+4. Delete or relax the policy, and the targets recover on the next probe pass.
+
 ## Usage
 
 ```bash
 # Start the backend server
-agent-analyzer serve --config /etc/agent-analyzer/config.yaml
+rogue-agent serve --config /etc/rogue-agent/config.yaml
 
 # Launch the terminal UI (connects to server at localhost:8000 by default)
-agent-analyzer tui
+rogue-agent tui
 
 # Print a one-shot status snapshot
-agent-analyzer status
-agent-analyzer status --json
+rogue-agent status
+rogue-agent status --json
 ```
 
 Run both components locally for development:
@@ -86,10 +97,10 @@ The `deploy/` directory contains ready-to-use manifests:
 
 | File               | Purpose                                                                      |
 | ------------------ | ---------------------------------------------------------------------------- |
-| `configmap.yaml`   | Server config mounted at `/etc/agent-analyzer/config.yaml`                   |
+| `configmap.yaml`   | Server config mounted at `/etc/rogue-agent/config.yaml`                   |
 | `deployment.yaml`  | Single-replica Deployment + Service (port 8000)                              |
 | `rbac.yaml`        | ServiceAccount + ClusterRole with read-only access to Services and Endpoints |
-| `netpol-demo.yaml` | Example NetworkPolicy                                                        |
+| `netpol-demo.yaml` | Example CiliumNetworkPolicy that constrains the rogue agent's egress         |
 
 ```bash
 kubectl apply -f deploy/rbac.yaml

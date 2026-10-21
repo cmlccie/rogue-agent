@@ -3,34 +3,6 @@
 version = 4
 
 [[package]]
-name = "agent-analyzer"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "axum",
- "axum-test",
- "chrono",
- "clap",
- "crossterm",
- "k8s-openapi",
- "kube",
- "notify",
- "predicates",
- "ratatui",
- "reqwest",
- "serde",
- "serde_json",
- "serde_yaml_neo",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "url",
-]
-
-[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2669,6 +2641,34 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rogue-agent"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "axum",
+ "axum-test",
+ "chrono",
+ "clap",
+ "crossterm",
+ "k8s-openapi",
+ "kube",
+ "notify",
+ "predicates",
+ "ratatui",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_yaml_neo",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "url",
 ]
 
 [[package]]

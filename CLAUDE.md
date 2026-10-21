@@ -18,7 +18,7 @@ cargo run -- status --json   # JSON output
 
 ## Architecture
 
-`agent-analyzer` is a Kubernetes-native TUI application for discovering and probing AI components (models, agents, tools, websites) with reachability testing. It runs as a backend server that continuously discovers and probes targets, with a TUI client that polls the backend.
+`rogue-agent` is a Kubernetes-native demo agent that behaves like a rogue AI workload: it discovers locally hosted AI services (models, A2A agents, MCP tools) and external services (ChatGPT, Claude, etc.) and persistently attempts to connect to and access them. Its purpose is to make the effect of Cilium Network Policies visible, showing how zero-trust L3/L4/L7 policies constrain an agent to explicitly allowed communication paths. It runs as a backend server that continuously discovers and probes targets, with a TUI client that polls the backend and shows each target's reachability and failure reason.
 
 ### Module layout
 

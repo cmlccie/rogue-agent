@@ -1,5 +1,5 @@
 # CiliumNetworkPolicy demo: apply this to watch green checkmarks flip to red X's
-# in the agent-analyzer TUI. It allows agent-analyzer egress only to Services
+# in the rogue-agent TUI. It allows rogue-agent egress only to Services
 # matching app=vllm, blocking all other model/agent/tool endpoints.
 #
 # Usage:
@@ -10,13 +10,13 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: agent-analyzer-demo
+  name: rogue-agent-demo
   namespace: default
 spec:
-  description: "Demo egress policy for agent-analyzer: blocks non-vllm AI endpoints"
+  description: "Demo egress policy for rogue-agent: blocks non-vllm AI endpoints"
   endpointSelector:
     matchLabels:
-      app: agent-analyzer
+      app: rogue-agent
   egress:
     # Allow DNS resolution (required for service discovery and HTTP clients).
     - toEndpoints:

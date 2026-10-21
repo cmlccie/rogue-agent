@@ -1,4 +1,4 @@
-//! Agent Analyzer — Kubernetes-native AI component discovery and reachability analyzer.
+//! Rogue Agent — a Kubernetes-native agent that discovers and persistently probes AI services to demonstrate network policy enforcement.
 //!
 //! The library is organized into two top-level modules:
 //!

@@ -1,4 +1,4 @@
-use agent_analyzer::cli;
+use rogue_agent::cli;
 
 #[tokio::main]
 async fn main() {

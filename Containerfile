@@ -34,7 +34,7 @@ RUN touch src/lib.rs src/main.rs && cargo build --release --locked
 # Stage 2 — distroless runtime: no shell, no package manager, non-root by default.
 FROM gcr.io/distroless/static-debian12:nonroot
 
-COPY --from=builder /build/target/release/agent-analyzer /opt/agent-analyzer
+COPY --from=builder /build/target/release/rogue-agent /opt/rogue-agent
 
 WORKDIR /opt
 EXPOSE 8000
@@ -49,5 +49,5 @@ EXPOSE 8000
 #
 # Split this way, `args`-only callers work, `docker run <image>` is unchanged, and
 # `docker run <image> tui` reaches the other sub-commands.
-ENTRYPOINT ["/opt/agent-analyzer"]
-CMD ["serve", "--config", "/etc/agent-analyzer/config.yaml"]
+ENTRYPOINT ["/opt/rogue-agent"]
+CMD ["serve", "--config", "/etc/rogue-agent/config.yaml"]

@@ -25,10 +25,10 @@ fn free_port() -> u16 {
 
 fn start_mock_server(port: u16, extra_args: &[&str]) -> ServerGuard {
     let bind = format!("127.0.0.1:{port}");
-    let mut cmd = Command::new(cargo_bin("agent-analyzer"));
+    let mut cmd = Command::new(cargo_bin("rogue-agent"));
     cmd.args(["serve", "--bind", &bind, "mock"]);
     cmd.args(extra_args);
-    ServerGuard(cmd.spawn().expect("failed to spawn agent-analyzer"))
+    ServerGuard(cmd.spawn().expect("failed to spawn rogue-agent"))
 }
 
 fn wait_for_server(port: u16) {
